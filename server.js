@@ -52,8 +52,9 @@ app.post("/execute-sql", async (req, res) => {
     return res.status(400).json({ error: reason });
   }
 
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     await client.query("SET statement_timeout TO 10000");
     const started = Date.now();
     const result = await client.query(sql);
@@ -71,7 +72,7 @@ app.post("/execute-sql", async (req, res) => {
       detail: err.message,
     });
   } finally {
-    client.release();
+    if (client) client.release();
   }
 });
 
