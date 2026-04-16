@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import pg from "pg";
 import fs from "fs";
@@ -38,7 +39,8 @@ const pool = new Pool({
     client.release();
     console.log("Database connectivity OK");
   } catch (err) {
-    console.error("Database connectivity FAILED:", err.message);
+    console.error("Database connectivity FAILED:", err.message || err.code || "(no message)");
+    if (!err.message) console.error(err);
   }
 })();
 
