@@ -23,8 +23,7 @@ const ca = fs.readFileSync(caPath, "utf8");
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    ca,
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
   max: Number(process.env.PGPOOL_MAX || 10),
   idleTimeoutMillis: 30000,
