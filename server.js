@@ -15,6 +15,17 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
+(async () => {
+  try {
+    const client = await pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+    console.log("Database connectivity OK");
+  } catch (err) {
+    console.error("Database connectivity FAILED:", err.message);
+  }
+})();
+
 app.post("/execute-sql", async (req, res) => {
   const sql = req.body?.sql;
 
