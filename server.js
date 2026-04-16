@@ -8,10 +8,11 @@ app.use(express.json({ limit: "1mb" }));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false },
+  ssl:
+    process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false },
   max: Number(process.env.PGPOOL_MAX || 10),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 10000,
 });
 
 app.post("/execute-sql", async (req, res) => {
@@ -31,18 +32,22 @@ app.post("/execute-sql", async (req, res) => {
 
     return res.json({
       rowCount: result.rowCount,
-      columns: result.fields.map(f => f.name),
+      columns: result.fields.map((f) => f.name),
       rows: result.rows,
-      durationMs
+      durationMs,
     });
   } catch (err) {
     return res.status(500).json({
       error: "Query execution failed",
-      detail: err.message
+      detail: err.message,
     });
   } finally {
     client.release();
   }
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true });
 });
 
 const port = Number(process.env.PORT || 8080);
