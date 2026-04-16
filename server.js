@@ -1,15 +1,31 @@
 import express from "express";
 import pg from "pg";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { validate_sql } from "./validator.js";
 
 const { Pool } = pg;
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const caPath =
+  process.env.PG_CA_CERT_PATH || path.join(__dirname, "certs", "do-ca.crt");
+const ca = fs.readFileSync(caPath, "utf8");
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false },
+  ssl: {
+    ca,
+    rejectUnauthorized: true,
+  },
   max: Number(process.env.PGPOOL_MAX || 10),
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
@@ -55,10 +71,6 @@ app.post("/execute-sql", async (req, res) => {
   } finally {
     client.release();
   }
-});
-
-app.get("/health", (_req, res) => {
-  res.status(200).json({ ok: true });
 });
 
 const port = Number(process.env.PORT || 8080);
