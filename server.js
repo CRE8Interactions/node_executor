@@ -33,8 +33,9 @@ const pool = new Pool({
 });
 
 app.post("/execute-sql", async (req, res) => {
+  console.log("Request:", req.body);
   const sql = req.body?.sql;
-
+  console.log("SQL:", sql);
   const [ok, reason] = validate_sql(sql);
   if (!ok) {
     return res.status(400).json({ error: reason });
